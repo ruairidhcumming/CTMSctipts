@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6666294069310099778}
   - component: {fileID: 1472821217}
   - component: {fileID: 1994416297258104528}
-  - component: {fileID: 2375767372187455596}
+  - component: {fileID: 8746286179270573049}
   m_Layer: 0
   m_Name: Car1
   m_TagString: Untagged
@@ -111,7 +111,7 @@ MonoBehaviour:
   Target: {fileID: 0}
   Base: {fileID: 0}
   Holding: {fileID: 0}
---- !u!114 &2375767372187455596
+--- !u!114 &8746286179270573049
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

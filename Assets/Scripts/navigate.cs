@@ -31,14 +31,16 @@ public class navigate : MonoBehaviour
     {
         if (carying == false)
         {
-            //GameObject nearest = NearestCollectable(Agent);
-            //if (nearest) { 
-            //float dist = Vector3.Distance(nearest.transform.position, this.transform.position);
-            //    if (dist < this.GetComponent<VehCFG>.sightRadius)
-            //    {
-                    Agent.SetDestination(NearestCollectable(Agent).transform.position);
-           //     }
-           //     }
+            GameObject nearest = NearestCollectable(Agent);
+            if (nearest) { 
+            float dist = Vector3.Distance(nearest.transform.position, this.transform.position);
+                float sightRadius =  this.GetComponent<VehCFG>().sightRadius;
+                //sctipt = this.GetComponent<VehCFG>;
+              if (dist < sightRadius)
+                {
+                    Agent.SetDestination(nearest.transform.position);
+                }
+                }
             }
             
         

@@ -31,18 +31,18 @@ public class baseControlScript : MonoBehaviour
             //Debug.Log(resource.res);
             if (BaseResources.ContainsKey(resource.res)) {
                 BaseResources[resource.res] += resource.val;
-                //Debug.Log("added new resource");
+                Debug.Log("added new resource");
             }
             else
             {
                 BaseResources.Add(resource.res, resource.val);
-                //Debug.Log("resource increased");
+                Debug.Log("resource increased");
             }
             //Debug.Log(BaseResources);
         }
         //Debug.Log(col.gameObject.tag);
         if (col.gameObject.tag == "Thrown")
-            //Debug.Log("new resource created, old destroyed");
+            Debug.Log("new resource created, old destroyed");
             Instantiate(Resource, base.transform.position + new Vector3(Random.Range(0, 100), 2000, Random.Range(0, 200)), Quaternion.identity);
             Destroy(col.gameObject);
 

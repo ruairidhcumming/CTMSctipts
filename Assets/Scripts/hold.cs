@@ -26,7 +26,7 @@ public class hold : MonoBehaviour {
         }
     }
     void OnTriggerEnter(Collider col)
-    { Behaviour script;
+    { //Behaviour script;
         Debug.Log("hit");
         if (col.gameObject.tag == "Collect" & !carying)
         { Debug.Log("collected");
