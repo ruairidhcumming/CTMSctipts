@@ -11,6 +11,7 @@ public class TeamHandler : MonoBehaviour
     Vector3 select2 = new Vector3(-9999, 0, 0);
     Vector3 ForwardFlat;
     Material SelectMaterial;
+    Material HighlightMaterial;
     GameObject cube;
     GameObject sphere1;
     GameObject sphere2;
@@ -21,6 +22,7 @@ public class TeamHandler : MonoBehaviour
     void Start()
     {
         SelectMaterial = Resources.Load("Selector", typeof(Material)) as Material;
+        //HighlightMaterial = Resources.Load("outline", typeof(Material)) as Material;
         //instantiate first car
         // UnityEngine.Object prefab = Resources.Load("Assets/FunNGames 1/prefabs/Car1.prefab", typeof(GameObject));
         GameObject Base = GameObject.Find("Base");
@@ -33,6 +35,7 @@ public class TeamHandler : MonoBehaviour
         //
         car.GetComponent<navigate>().Home = home.transform;
         car.GetComponent<navigate>().Base = Base.transform;
+        car.GetComponent<navigate>().Team = gameObject.transform;
         units.Add(car);
     }
 

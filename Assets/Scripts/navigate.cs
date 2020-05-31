@@ -11,8 +11,10 @@ public class navigate : MonoBehaviour
     public Transform Home;
     public Transform Target;
     public Transform Base;
-    public Transform Holding; 
+    public Transform Team;
+    public Transform Holding;
 
+    bool selected = false;
     NavMeshAgent Agent;
     Vector3 offset = new Vector3(0f, 1f, 0f);
     // Start is called before the first frame update
@@ -29,7 +31,21 @@ public class navigate : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (carying == false)
+        //check if object is selected
+        //Debug.Log("I'm attached to " + gameObject.name);
+
+        if (Team.GetComponent<TeamHandler>().selected.Contains(gameObject) & selected == false)
+        {
+            gameObject.Find("body").GetComponent<Renderer>().matreial = this.GetComponent<VehCFG>().HighlightMaterial;
+            selected = true;
+
+        }
+        else if (!Team.GetComponent<TeamHandler>().selected.Contains(gameObject) & selected == true) {
+            selected = false;
+            gameObject.Find("body").GetComponent<Renderer>().matreial = this.GetComponent<VehCFG>().NormalMaterial;
+        }
+        //check if object is carying something
+            if (carying == false)
         {
             GameObject nearest = NearestCollectable(Agent);
             if (nearest) { 
