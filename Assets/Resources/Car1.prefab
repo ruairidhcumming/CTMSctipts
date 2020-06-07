@@ -110,6 +110,7 @@ MonoBehaviour:
   Home: {fileID: 0}
   Target: {fileID: 0}
   Base: {fileID: 0}
+  Team: {fileID: 0}
   Holding: {fileID: 0}
 --- !u!114 &8746286179270573049
 MonoBehaviour:
@@ -126,6 +127,8 @@ MonoBehaviour:
   sightRadius: 20
   hp: 100
   str: 10
+  HighlightMaterial: {fileID: 2100000, guid: b8e08372563da0b4fbcc077304e64535, type: 2}
+  NormalMaterial: {fileID: 2100000, guid: 66c33743f8d19dc4a973001e84ad93c9, type: 2}
 --- !u!1 &2788236524146626690
 GameObject:
   m_ObjectHideFlags: 0

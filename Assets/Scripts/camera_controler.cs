@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class camera_controler : MonoBehaviour
 {
-    float ScrollSpeed = 15f;
+    float ScrollSpeed = 50f;
     float ScrollEdge = 0.01f;
      
     private int HorizontalScroll = 1;
@@ -14,18 +14,18 @@ public class camera_controler : MonoBehaviour
     float PanSpeed = 10f;
     float TurnSpeed = 30f;
     float PanRotateSpeed= 90f;
-    Vector2 ZoomRange = new Vector2(0.5f,50f);
+    Vector2 ZoomRange = new Vector2(0.5f,100f);
     Vector2 FollowZoomRange = new Vector2(-50, 50);
 
     float CurrentZoom = 10f;
     float ZoomZpeed = 1f;
-    float ZoomRotation = 1f;
+    float ZoomRotation = 0.5f;
     Quaternion zoomtilt;
     float panrotation= 0f;
 
     private Vector3 groundPos;
     private Vector3 InitRotation;
-    
+    private Vector3 FlatForward;
     private float y;
     private float x;
     int terrainMask = 1 << 8;
@@ -42,7 +42,8 @@ public class camera_controler : MonoBehaviour
     }
 
     void Update()
-    {   
+    {
+        FlatForward = new Vector3(transform.forward.x, 0, transform.forward.z);
         if (mode == "follow")
             
         {   //ZOOM IN/OUT follow mode
@@ -78,7 +79,7 @@ public class camera_controler : MonoBehaviour
                 + (Vector3.up * 2) ;
                 //- new Vector3(0, (target.transform.position.y - (InitPos.y + CurrentZoom)) * 0.1f, 0)));
 
-            if (Input.GetKey("mouse 1"))
+            if (Input.GetKey("mouse 2"))
             {
                 //(Input.mousePosition.x - Screen.width * 0.5)/(Screen.width * 0.5)
 
@@ -121,16 +122,16 @@ public class camera_controler : MonoBehaviour
             }
 
             //PAN
-            if (Input.GetKey("mouse 2"))
-            {
-                //(Input.mousePosition.x - Screen.width * 0.5)/(Screen.width * 0.5)
+            //if (Input.GetKey("mouse 2"))
+            //{
+            //    //(Input.mousePosition.x - Screen.width * 0.5)/(Screen.width * 0.5)
 
-                transform.Translate(Vector3.right * Time.deltaTime * PanSpeed * (Input.mousePosition.x - Screen.width * 0.5f) / (Screen.width * 0.5f), Space.World);
-                transform.Translate(Vector3.forward * Time.deltaTime * PanSpeed * (Input.mousePosition.y - Screen.height * 0.5f) / (Screen.height * 0.5f), Space.World);
+            //    transform.Translate(Vector3.right * Time.deltaTime * PanSpeed * (Input.mousePosition.x - Screen.width * 0.5f) / (Screen.width * 0.5f), Space.World);
+            //    transform.Translate(Vector3.forward * Time.deltaTime * PanSpeed * (Input.mousePosition.y - Screen.height * 0.5f) / (Screen.height * 0.5f), Space.World);
 
-            }
-            else
-            {
+            //}
+            //else
+           // {
                 if (Input.GetKey("d") || Input.mousePosition.x >= Screen.width * (1 - ScrollEdge))
                 {
                     transform.Translate(transform.right * Time.deltaTime * ScrollSpeed, Space.World);
@@ -142,13 +143,13 @@ public class camera_controler : MonoBehaviour
 
                 if (Input.GetKey("w") || Input.mousePosition.y >= Screen.height * (1 - ScrollEdge))
                 {
-                    transform.Translate(transform.forward * Time.deltaTime * ScrollSpeed, Space.World);
+                    transform.Translate(FlatForward * Time.deltaTime * ScrollSpeed, Space.World);
                 }
                 else if (Input.GetKey("s") || Input.mousePosition.y <= Screen.height * ScrollEdge)
                 {
-                    transform.Translate(transform.forward * Time.deltaTime * -ScrollSpeed, Space.World);
+                    transform.Translate(FlatForward * Time.deltaTime * -ScrollSpeed, Space.World);
                 }
-            }
+            //}
         
             //ZOOM IN/OUT fly mode
 
@@ -160,7 +161,7 @@ public class camera_controler : MonoBehaviour
             transform.eulerAngles = transform.eulerAngles - new Vector3((transform.eulerAngles.x - (InitRotation.x + CurrentZoom * ZoomRotation)) * 0.1f, 0, 0);
             //rotate view
 
-            if (Input.GetKey("mouse 1"))
+            if (Input.GetKey("mouse 2"))
             {
                 //(Input.mousePosition.x - Screen.width * 0.5)/(Screen.width * 0.5)
 

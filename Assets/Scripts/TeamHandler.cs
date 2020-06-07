@@ -1,23 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class TeamHandler : MonoBehaviour
-{
+{   //LISTS OF UNITS BUILDINGS ETC
     public List<GameObject> units = new List<GameObject>();
     public List<GameObject> buildings = new List<GameObject>();
     public List<GameObject> selected = new List<GameObject>();
+
+    // POINTS FOR SELECT BOX INTERACTIONS DEFAULTING TO FAR AWAY
     Vector3 select1 = new Vector3(-9999, 0, 0);
     Vector3 select2 = new Vector3(-9999, 0, 0);
     Vector3 ForwardFlat;
+    //MATERIALS FOR HIGHLIGHTING SELECTED OBJECTS
     Material SelectMaterial;
     Material HighlightMaterial;
+    //GAME OBJECTS FOR SELECTION MECANIC
     GameObject cube;
     GameObject sphere1;
     GameObject sphere2;
-    public GameObject car;
     public GameObject selector;
+    //LIST FOR MANAGING RESOURCES
+    public Dictionary<string, float> TeamResources = new Dictionary<string, float>();
+    //UI COMPONENTS
+    string txt;
+    Text textbox;
+    //game objects to create 
+    public GameObject car;
+    //masks for raycast interactions
     int terrainMask = 1 << 8;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +49,9 @@ public class TeamHandler : MonoBehaviour
         car.GetComponent<navigate>().Base = Base.transform;
         car.GetComponent<navigate>().Team = gameObject.transform;
         units.Add(car);
+        buildings.Add(Base);
+
+        textbox = GameObject.Find("Canvas").GetComponent<Text>();
     }
 
     // Update is called once per frame
@@ -50,7 +65,7 @@ public class TeamHandler : MonoBehaviour
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit, 1000, terrainMask))
-            {   Debug.Log("Click Hit");
+            {  // Debug.Log("Click Hit");
 
                 //actions dependent on object clicked need to be handled here
                 if (hit.transform)
@@ -70,13 +85,14 @@ public class TeamHandler : MonoBehaviour
                 }
             }
         }
+        
         if (Input.GetMouseButton(0))//should track while mouse is held
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit, 1000, terrainMask))
-            {   Debug.Log("Hold Hit");
-                Debug.Log(hit.transform.gameObject.tag);
+            if (Physics.Raycast(ray, out hit, 1000))
+            {   //Debug.Log("Hold Hit");
+               // Debug.Log(hit.transform.gameObject.tag);
 
                 if (hit.transform.gameObject.tag == "Terrain")
                 {
@@ -99,22 +115,83 @@ public class TeamHandler : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             selected = selectInCube(cube);
+            Debug.Log("destroy selector cube");
             Destroy(cube);
 
         }
             // if both select points are set draw box between them and select objects inside the box
             if (select1.x >-9999 & select2.x > -9999)
-        {//find horizontal camera forward
+            {//find horizontal camera forward
             
                  if (Input.GetMouseButtonUp(0))//when mouse is released select units in box, destroy box, reset select points to 'null'
                  {
-                    Debug.Log("Mouse Released");
+                    //Debug.Log("Mouse Released");
                     select1 = new Vector3(-9999, 0, 0);
                     select2 = new Vector3(-9999, 0, 0);
                     
                  }
+            }
+        if (Input.GetMouseButtonDown(1))
+        {
+            //Debug.Log("Click");
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit, 1000, terrainMask))
+            {
+               // Debug.Log("Click Hit");
+
+                //actions dependent on object clicked need to be handled here
+                if (hit.transform)
+                {
+
+                    foreach (GameObject obj in selected)
+                    {
+                        obj.GetComponent<navigate>().mode = "commanded";
+                        obj.GetComponent<navigate>().Agent.SetDestination(hit.point);
+
+                    }
+                        
+                    
+                }
+            }
         }
-    }
+        //set score displays
+        //Get resources from all buildings and reset building resources 
+        foreach (GameObject b in buildings)
+        {
+            Dictionary<string, float> childList = b.GetComponent<baseControlScript>().Resources;
+            if (childList != null) {
+                
+                foreach (KeyValuePair<string, float> res in childList)
+                {
+                    if (TeamResources.ContainsKey(res.Key))
+                    {
+                        TeamResources[res.Key] += res.Value;
+                        Debug.Log("resource increased");
+                        
+                    }
+                    else
+                    {
+                        TeamResources.Add(res.Key, res.Value);
+                        Debug.Log("added new resource");
+                    }
+
+                }
+                //clear list from child buildings to prevent double counting
+                b.GetComponent<baseControlScript>().Resources.Clear();
+            }
+           
+        }
+        //update text with values from resuoures dict
+        txt = "";
+        foreach (KeyValuePair<string, float> res in TeamResources)
+        {
+            txt = txt + res.Key + " : " + res.Value.ToString() + "\n";
+        }
+        textbox.text = txt;
+        
+    }   
+
     List<GameObject> selectInCube(GameObject cube)
     {
         List<GameObject> inpt = cube.GetComponent<SelectionHandler>().selected;

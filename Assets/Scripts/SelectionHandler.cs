@@ -18,13 +18,13 @@ public class SelectionHandler : MonoBehaviour
     }
     void OnTriggerEnter(Collider Col)
     {
-        Debug.Log("added object to selection");
+        Debug.Log("added object to selection "+(Col.gameObject.name));
         selected.Add(Col.gameObject);
 
     }
     void OnTriggerExit(Collider Col)
     {
-        Debug.Log("removed object from selection");
+        Debug.Log("removed object from selection "+(Col.gameObject.name));
         selected.Remove(Col.gameObject);
     }
 }

@@ -6,7 +6,7 @@ public class baseControlScript : MonoBehaviour
 {
     public GameObject Resource;
     public GameObject Base;
-    public Dictionary<string, int> BaseResources = new Dictionary<string, int>() ;
+    public Dictionary<string, float> Resources = new Dictionary<string, float>() ;
 
     // Start is called before the first frame update
     void Start()
@@ -29,22 +29,28 @@ public class baseControlScript : MonoBehaviour
         {
             Debug.Log(resource.val);
             //Debug.Log(resource.res);
-            if (BaseResources.ContainsKey(resource.res)) {
-                BaseResources[resource.res] += resource.val;
-                Debug.Log("added new resource");
+            if (Resources.ContainsKey(resource.res)) {
+                Resources[resource.res] += resource.val;
+               
             }
             else
             {
-                BaseResources.Add(resource.res, resource.val);
-                Debug.Log("resource increased");
+                Resources.Add(resource.res, resource.val);
+               
             }
             //Debug.Log(BaseResources);
         }
-        //Debug.Log(col.gameObject.tag);
+        else
+        {
+            Debug.Log("triggered by not resource component");
+        }
+        Debug.Log(col.gameObject.tag);
+        Debug.Log(col.gameObject.tag == "Thrown");
         if (col.gameObject.tag == "Thrown")
+        {
             Debug.Log("new resource created, old destroyed");
             Instantiate(Resource, base.transform.position + new Vector3(Random.Range(0, 100), 2000, Random.Range(0, 200)), Quaternion.identity);
             Destroy(col.gameObject);
-
+        }
                 }
 }

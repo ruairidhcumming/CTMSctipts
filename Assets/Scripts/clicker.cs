@@ -35,7 +35,7 @@ public class clicker : MonoBehaviour
     void Select(GameObject go)
     {
         //Debug.Log("Click object name");
-        Debug.Log(go.tag);
+        //Debug.Log(go.tag);
         if (go.tag != "Terrain") // & go.GetComponent<Rigidbody>()) 
         {
             

@@ -13,9 +13,9 @@ public class navigate : MonoBehaviour
     public Transform Base;
     public Transform Team;
     public Transform Holding;
-
+    public string mode = "idle";//options idle/commanded used to control behavior when commanded to move to point (ignore/divert to pickups etc)
     bool selected = false;
-    NavMeshAgent Agent;
+    public NavMeshAgent Agent;
     Vector3 offset = new Vector3(0f, 1f, 0f);
     // Start is called before the first frame update
     void Start()
@@ -31,21 +31,25 @@ public class navigate : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //check if object is selected
+        //check if object is selected and set selected status flag
         //Debug.Log("I'm attached to " + gameObject.name);
 
         if (Team.GetComponent<TeamHandler>().selected.Contains(gameObject) & selected == false)
         {
-            gameObject.Find("body").GetComponent<Renderer>().matreial = this.GetComponent<VehCFG>().HighlightMaterial;
+            GameObject body = GameObject.Find("body");
+            body.GetComponent<Renderer>().material = this.GetComponent<VehCFG>().HighlightMaterial;
             selected = true;
 
         }
         else if (!Team.GetComponent<TeamHandler>().selected.Contains(gameObject) & selected == true) {
             selected = false;
-            gameObject.Find("body").GetComponent<Renderer>().matreial = this.GetComponent<VehCFG>().NormalMaterial;
+            GameObject body = GameObject.Find("body");
+            body.GetComponent<Renderer>().material = this.GetComponent<VehCFG>().NormalMaterial;
         }
+
+
         //check if object is carying something
-            if (carying == false)
+        if (carying == false & mode  == "idle")
         {
             GameObject nearest = NearestCollectable(Agent);
             if (nearest) { 
@@ -68,10 +72,15 @@ public class navigate : MonoBehaviour
             if ( arrived(Agent) ==true)
             {
                 drop();
+               
             }
         }
+        if (arrived(Agent) == true)
+        {
+            mode = "idle";
+        }
 
-        
+
     }
 
     void drop()
@@ -91,7 +100,7 @@ public class navigate : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        Behaviour script;
+       // Behaviour script;
         //Debug.Log("hit");
         if (col.gameObject.tag == "Collect" & !carying)
         {

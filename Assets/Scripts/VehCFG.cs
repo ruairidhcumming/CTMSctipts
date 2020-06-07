@@ -8,6 +8,8 @@ public class VehCFG : MonoBehaviour
     //initilise movement 
     public float hp = 100;
     public float str = 10;
+    public Material HighlightMaterial;
+    public Material NormalMaterial;
     // Start is called before the first frame update
     void Start()
     {
