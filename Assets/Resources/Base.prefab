@@ -108,3 +108,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Resource: {fileID: 0}
   Base: {fileID: 0}
+  HighlightMaterial: {fileID: 2100000, guid: b8e08372563da0b4fbcc077304e64535, type: 2}
+  NormalMaterial: {fileID: 2100000, guid: 66c33743f8d19dc4a973001e84ad93c9, type: 2}
+  Team: {fileID: 0}

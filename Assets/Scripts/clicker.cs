@@ -39,8 +39,8 @@ public class clicker : MonoBehaviour
         if (go.tag != "Terrain") // & go.GetComponent<Rigidbody>()) 
         {
             
-            Camera.main.GetComponent<camera_controler>().target = go;
-            Camera.main.GetComponent<camera_controler>().mode = "follow";
+           // Camera.main.GetComponent<camera_controler>().target = go;
+           // Camera.main.GetComponent<camera_controler>().mode = "follow";
 
         }
         //set clicked object as main camera target

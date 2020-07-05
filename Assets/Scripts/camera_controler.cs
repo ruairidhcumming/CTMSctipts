@@ -7,11 +7,11 @@ public class camera_controler : MonoBehaviour
     float ScrollSpeed = 50f;
     float ScrollEdge = 0.01f;
      
-    private int HorizontalScroll = 1;
-    private int VerticalScroll = 1;
-    private int DiagonalScroll = 1;
+    //private int HorizontalScroll = 1;
+    //private int VerticalScroll = 1;
+    //private int DiagonalScroll = 1;
      
-    float PanSpeed = 10f;
+    //float PanSpeed = 10f;
     float TurnSpeed = 30f;
     float PanRotateSpeed= 90f;
     Vector2 ZoomRange = new Vector2(0.5f,100f);
@@ -22,7 +22,7 @@ public class camera_controler : MonoBehaviour
     float ZoomRotation = 0.5f;
     Quaternion zoomtilt;
     float panrotation= 0f;
-
+    private Vector3 vel;
     private Vector3 groundPos;
     private Vector3 InitRotation;
     private Vector3 FlatForward;
@@ -58,11 +58,25 @@ public class camera_controler : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
                 return;
             }
+            
+            if (target.GetComponent<Rigidbody>() != null)
+            {
+                vel =target.GetComponent<Rigidbody>().velocity.normalized;
+                Debug.DrawRay(target.transform.position, vel * 1, Color.green);
+                if (vel.magnitude < 0.1)
+                {
+                 vel = target.transform.InverseTransformDirection(target.transform.forward);
 
-            Vector3 vel = target.GetComponent<Rigidbody>().velocity.normalized;
-            if (vel.magnitude < 1) {
-                vel = target.transform.forward;
-                    }
+                    Debug.DrawRay(target.transform.position, vel * 1, Color.red);
+                }
+            }
+            else
+            {
+                 vel = target.transform.InverseTransformDirection(target.transform.forward);
+
+            }
+            Debug.Log(target);
+            Debug.Log(target.transform.forward);
 
             CurrentZoom -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * 1000 * ZoomZpeed;
             //rotation geometry is all screwed up maybe its sign convention, maybe its maybelene
@@ -72,11 +86,13 @@ public class camera_controler : MonoBehaviour
             //transform.position = transform.position - new Vector3(0, (transform.position.y - (InitPos.y + CurrentZoom)) * 0.1f, 0);
             // transform.eulerAngles = transform.eulerAngles - new Vector3((transform.eulerAngles.x - (InitRotation.x + CurrentZoom * ZoomRotation)) * 0.1f, 0, 0);
             //set position to follow "target"
-            
+            //Debug.DrawRay(target.transform.position, vel * 5, Color.red);
+            //Debug.DrawRay(target.transform.position, Vector3.up * 2, Color.green);
             transform.position = 
                 target.transform.position  
-                //+ (zoomtilt * -(vel * 5))
+                + (-(vel * 5))
                 + (Vector3.up * 2) ;
+                
                 //- new Vector3(0, (target.transform.position.y - (InitPos.y + CurrentZoom)) * 0.1f, 0)));
 
             if (Input.GetKey("mouse 2"))
