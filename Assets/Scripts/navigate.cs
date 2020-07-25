@@ -19,13 +19,21 @@ public class navigate : MonoBehaviour
     float pold=0;
     float iold=0;
     float dold=0;
+    float steeringAngle = 0;
+    float SAold = 0;
     public float P;
     public float I;
     public float D;
+    public float SteeringD;
+    public float PEffect;
+    public float IEffect;
+    public float DEffect;
+    public float AgentSpeed=5;
+    public float AgentSlowSpeed = 0.5F;
     public List<AxleInfo> axleInfos; // the information about each individual axle
     public float maxMotorTorque; // maximum torque the motor can apply to wheel
     public float maxSteeringAngle; // maximum steer angle the wheel can have
-
+    public float steeringSwitch = 90;
     bool carying = false;
     GameObject CarriedGameObject;
     public GameObject grabber;
@@ -42,6 +50,7 @@ public class navigate : MonoBehaviour
     void Start()
     {
         Agent = this.gameObject.transform.Find("navmeshHolder").GetComponent<NavMeshAgent>();
+        Agent.transform.parent = Team;
         carying = false;
         if (grabber == null) {
             grabber = this.GetComponent<GameObject>();
@@ -52,9 +61,12 @@ public class navigate : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //check if vehicle is stuck
+        Debug.Log(stuck(grabber, Agent));
+       
         //check if object is selected and set selected status flag
         //Debug.Log("I'm attached to " + gameObject.name);
-        Debug.DrawRay(transform.position,transform.forward*10,Color.blue);
+        
         if (Team.GetComponent<TeamHandler>().selected.Contains(gameObject) & selected == false)
         {
             GameObject body = GameObject.Find("body");
@@ -74,10 +86,10 @@ public class navigate : MonoBehaviour
         {
             GameObject nearest = NearestCollectable(Agent);
             if (nearest) { 
-            float dist = Vector3.Distance(nearest.transform.position, this.transform.position);
+            float targetdist = Vector3.Distance(nearest.transform.position, this.transform.position);
                 float sightRadius =  this.GetComponent<VehCFG>().sightRadius;
                 //sctipt = this.GetComponent<VehCFG>;
-              if (dist < sightRadius)
+              if (targetdist < sightRadius)
                 {
                     Agent.SetDestination(nearest.transform.position);
                 }
@@ -90,9 +102,9 @@ public class navigate : MonoBehaviour
             CarriedGameObject.transform.position = grabber.transform.position + offset;// + col.transform.localScale.magnitude);
             CarriedGameObject.transform.rotation = grabber.transform.rotation;
 
-            if ( arrived(Agent) ==true)
+            if ( arrived(Agent) ==true & !stuck(grabber,Agent) & (Agent.transform.position-grabber.transform.position).magnitude < 1.5)
             {
-                drop();
+                drop(Base);
                
             }
         }
@@ -104,24 +116,75 @@ public class navigate : MonoBehaviour
 
     }
     void drive()
-    {   
+    {
+        Debug.DrawRay(grabber.transform.position, grabber.transform.forward * 10, Color.blue);
+        //steering calculations
+        steeringAngle = Vector3.SignedAngle(
+            (-new Vector3(grabber.transform.position.x,0, grabber.transform.position.z)+
+            new Vector3(Agent.transform.position.x,0,Agent.transform.position.z)), 
+            new Vector3(grabber.transform.forward.x, 0, grabber.transform.forward.z),
+            Vector3.up);
+
+        Debug.DrawRay(grabber.transform.position, new Vector3(0, 0, steeringAngle), Color.green);
+        //Debug.Log(steeringAngle);
+        
         //pid calculations
-        p = (grabber.transform.position - Agent.transform.position).magnitude;
-      
-        i = iold + p;
+        //p is forward backward distance 
+        p = Vector3.Dot(
+            (grabber.transform.position - new Vector3(0, grabber.transform.position.y, 0)) - (Agent.transform.position - new Vector3(0, Agent.transform.position.y, 0)),
+            grabber.transform.forward
+            );
+        // old p simple linear distance on ground plane
+        float dist  =((grabber.transform.position - new Vector3(0, grabber.transform.position.y, 0)) - (Agent.transform.position - new Vector3(0, Agent.transform.position.y, 0))) .magnitude;
+        if (dist < 1& Agent.desiredVelocity.magnitude <0.1)
+        {
+            p = 0;
+            dist = 0;
+            i = 0;
+            iold = 0;
+        }
+        //stop agent running away 
+        if (dist > 5 )
+        { Debug.Log("agent speed = 0");
+            Agent.speed = AgentSlowSpeed;
+
+        }
+        else
+        {
+            Debug.Log("agent speed > 0");
+            Agent.speed = AgentSpeed;
+
+        }
+        //    if (steeringAngle > steeringSwitch| steeringAngle < -steeringSwitch)
+        //{
+        //    //p = -p;
+        //    steeringAngle = -steeringAngle;
+        //}
+        steeringAngle = -steeringAngle / 2;
+        steeringAngle = steeringAngle - (steeringAngle + SAold) * SteeringD;
+        SAold = steeringAngle;
+        i = iold + p-dist*0.1f;
       
         d = p - pold;
 
         pold = p;
         iold = i;
         dold = d;
-        float throttle = p * P + i * I + d * D;
-        float steeringAngle = Vector3.SignedAngle(grabber.transform.forward, (grabber.transform.position - Agent.transform.position), Vector3.up);
+        PEffect = -p * P +dist *P/10;
+        IEffect = -i * I;
+        DEffect = d * D;
+
+        float throttle = PEffect+ IEffect + DEffect;
+        if (throttle < 0) 
+        {
+            steeringAngle = -steeringAngle;
+        }
         //apply calculated values to wheels
-        float motor = Mathf.Clamp( throttle, maxMotorTorque, -maxMotorTorque); //Input.GetAxis("Vertical");
-        float steering = Mathf.Clamp(steeringAngle, maxSteeringAngle, maxSteeringAngle); //Input.GetAxis("Horizontal");
-        Debug.Log(motor);
-        Debug.Log(steering);
+        float motor = Mathf.Clamp( throttle, -maxMotorTorque, maxMotorTorque); //Input.GetAxis("Vertical");
+        float steering = Mathf.Clamp(steeringAngle, -maxSteeringAngle, maxSteeringAngle); //Input.GetAxis("Horizontal");
+        //Debug.Log(motor);
+        
+        
         foreach (AxleInfo axleInfo in axleInfos)
         {
             if (axleInfo.steering)
@@ -136,7 +199,7 @@ public class navigate : MonoBehaviour
             }
         }
     }
-    void drop()
+    void drop(Transform dropTo)
     {
         if (CarriedGameObject != null)  //if (input.getaxis("drop")==1 & 
         {
@@ -144,7 +207,9 @@ public class navigate : MonoBehaviour
             CarriedGameObject.tag = "Thrown";
             CarriedGameObject.GetComponent<Rigidbody>().isKinematic = false;
             CarriedGameObject.GetComponent<Rigidbody>().useGravity = true;
-            CarriedGameObject.GetComponent<Rigidbody>().AddForce(10f *( Base.position- grabber.transform.position), ForceMode.Impulse);
+            CarriedGameObject.GetComponent<Rigidbody>().AddForce(10f *( dropTo.position- grabber.transform.position), ForceMode.Impulse);
+            i = 0;
+            iold = 0;
             //Debug.Log("drop");
             carying = false;
             Agent.SetDestination( grabber.transform.position);
@@ -230,5 +295,21 @@ public class navigate : MonoBehaviour
             }
         }
         return (nearest);
+    }
+    bool stuck(GameObject vehicle, NavMeshAgent agent)
+    {
+        if (
+            ((vehicle.transform.position - new Vector3(0, vehicle.transform.position.y, 0)) - (agent.transform.position - new Vector3(0, agent.transform.position.y, 0))).magnitude > 5
+            &
+            vehicle.transform.parent.GetComponent<Rigidbody>().velocity.magnitude < 0.1
+            )
+
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

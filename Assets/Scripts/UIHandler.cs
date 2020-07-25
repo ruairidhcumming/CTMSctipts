@@ -23,12 +23,12 @@ public class UIHandler : MonoBehaviour
         if ( this.GetComponent<TeamHandler>().selected.Count > 0)
         { 
             topSelected = this.GetComponent<TeamHandler>().selected[0];
-            Debug.Log(topSelected.name);
+            //Debug.Log(topSelected.name);
             Button[] buttons = topSelected.GetComponentsInChildren<Button>();
 
             foreach (Button b in buttons)
             {
-                Debug.Log(b.name);
+               // Debug.Log(b.name);
                 b.interactable = true ;
                 //       newb.transform.parent = Panel;
                 
