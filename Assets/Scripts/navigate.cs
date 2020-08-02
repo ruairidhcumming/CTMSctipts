@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using Math;
+
 [System.Serializable]
 public class AxleInfo
 {
@@ -29,8 +29,10 @@ public class navigate : MonoBehaviour
     public float PEffect;
     public float IEffect;
     public float DEffect;
+    //agent position controls 
     public float AgentSpeed=5;
     public float AgentSlowSpeed = 0.5F;
+    public float stucktimer = 2f;
     public List<AxleInfo> axleInfos; // the information about each individual axle
     public float maxMotorTorque; // maximum torque the motor can apply to wheel
     public float maxSteeringAngle; // maximum steer angle the wheel can have
@@ -147,12 +149,24 @@ public class navigate : MonoBehaviour
         //stop agent running away 
         if (stuck(grabber, Agent))
         {
-            //is the agent infront or behind the grabber
-            Vector3 relLoc = grabber.transform.position - Agent.transform.position;
-            float dir = Vector3.Dot(relLoc, grabber.transform.forward);
-            dir = -dir / Math.Abs(dir);
+            if (stucktimer < 0)
+            {
+                //is the agent infront or behind the grabber
+                Vector3 relLoc = grabber.transform.position - Agent.transform.position;
+                float dir = Vector3.Dot(relLoc, grabber.transform.forward);
+                dir = -dir / Mathf.Abs(dir);
 
-            Agent.transform.positon = 10 * dir * grabber.transform.forward;
+                Agent.transform.position = grabber.transform.position - 10 * dir * grabber.transform.forward;
+                stucktimer = 2f;
+            }
+            else
+            {
+                stucktimer -= Time.deltaTime;
+            }
+        }
+        else
+        {
+            stucktimer = 2f;
         }
         if (dist > 5 )
         { Debug.Log("agent speed = 0");
@@ -179,6 +193,7 @@ public class navigate : MonoBehaviour
 
         pold = p;
         iold = i;
+        iold = Mathf.Clamp(iold,-200, 200);
         dold = d;
         PEffect = -p * P +dist *P/10;
         IEffect = -i * I;
