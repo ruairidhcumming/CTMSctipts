@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Math;
 [System.Serializable]
 public class AxleInfo
 {
@@ -144,6 +145,15 @@ public class navigate : MonoBehaviour
             iold = 0;
         }
         //stop agent running away 
+        if (stuck(grabber, Agent))
+        {
+            //is the agent infront or behind the grabber
+            Vector3 relLoc = grabber.transform.position - Agent.transform.position;
+            float dir = Vector3.Dot(relLoc, grabber.transform.forward);
+            dir = -dir / Math.Abs(dir);
+
+            Agent.transform.positon = 10 * dir * grabber.transform.forward;
+        }
         if (dist > 5 )
         { Debug.Log("agent speed = 0");
             Agent.speed = AgentSlowSpeed;
