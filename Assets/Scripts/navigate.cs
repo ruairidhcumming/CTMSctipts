@@ -128,7 +128,7 @@ public class navigate : MonoBehaviour
             new Vector3(grabber.transform.forward.x, 0, grabber.transform.forward.z),
             Vector3.up);
 
-        Debug.DrawRay(grabber.transform.position, new Vector3(0, 0, steeringAngle), Color.green);
+        //Debug.DrawRay(grabber.transform.position, new Vector3(0, 0, steeringAngle), Color.green);
         //Debug.Log(steeringAngle);
         
         //pid calculations
@@ -158,6 +158,7 @@ public class navigate : MonoBehaviour
 
                 Agent.transform.position = grabber.transform.position - 10 * dir * grabber.transform.forward;
                 stucktimer = 2f;
+                iold = 0;//reset i term to prevent hung over i term wind up
             }
             else
             {
@@ -169,13 +170,13 @@ public class navigate : MonoBehaviour
             stucktimer = 2f;
         }
         if (dist > 5 )
-        { Debug.Log("agent speed = 0");
+        { //Debug.Log("agent speed = slow");
             Agent.speed = AgentSlowSpeed;
 
         }
         else
         {
-            Debug.Log("agent speed > 0");
+            //Debug.Log("agent speed > fast");
             Agent.speed = AgentSpeed;
 
         }
