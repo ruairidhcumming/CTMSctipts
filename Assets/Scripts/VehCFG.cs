@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class VehCFG : MonoBehaviour
 {
+    public string Team;
     public float sightRadius = 20;
     //initilise movement 
     public float hp = 100;

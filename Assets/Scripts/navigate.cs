@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -52,21 +53,29 @@ public class navigate : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("seting Agent");
         Agent = this.gameObject.transform.Find("navmeshHolder").GetComponent<NavMeshAgent>();
         Agent.transform.parent = Team;
+        //turn agent off and on again
+        Agent.enabled = false;
+        Agent.enabled = true;
         carying = false;
         if (grabber == null) {
             grabber = this.GetComponent<GameObject>();
         }
 
+
     }
 
     // Update is called once per frame
     void Update()
-    {
+    {   if (mode == "Following" & Target != null)
+        {
+            Agent.SetDestination(Target.position- Target.forward*3);
+        }
         //check if vehicle is stuck
-        Debug.Log(stuck(grabber, Agent));
-       
+        //Debug.Log(stuck(grabber, Agent));
+        
         //check if object is selected and set selected status flag
         //Debug.Log("I'm attached to " + gameObject.name);
         
@@ -107,7 +116,7 @@ public class navigate : MonoBehaviour
 
             if ( arrived(Agent) ==true & !stuck(grabber,Agent) & (Agent.transform.position-grabber.transform.position).magnitude < 1.5)
             {
-                drop(Base);
+                drop(Base.transform.position - grabber.transform.position);
                
             }
         }
@@ -225,15 +234,15 @@ public class navigate : MonoBehaviour
             }
         }
     }
-    void drop(Transform dropTo)
+    void drop(Vector3 dropTo,string newtag= "Thrown")//drop/throw a carried object and assign it a new tag 
     {
         if (CarriedGameObject != null)  //if (input.getaxis("drop")==1 & 
         {
             CarriedGameObject.transform.parent = null;
-            CarriedGameObject.tag = "Thrown";
+            CarriedGameObject.tag = newtag;
             CarriedGameObject.GetComponent<Rigidbody>().isKinematic = false;
             CarriedGameObject.GetComponent<Rigidbody>().useGravity = true;
-            CarriedGameObject.GetComponent<Rigidbody>().AddForce(10f *( dropTo.position- grabber.transform.position), ForceMode.Impulse);
+            CarriedGameObject.GetComponent<Rigidbody>().AddForce(10f *( dropTo), ForceMode.Impulse);
             i = 0;
             iold = 0;
             //Debug.Log("drop");
@@ -245,7 +254,30 @@ public class navigate : MonoBehaviour
     void OnTriggerEnter(Collider col)
     {
        // Behaviour script;
-        //Debug.Log("hit");
+        Debug.Log(col);
+        GameObject hitobj = col.transform.root.gameObject;
+   
+        //handle collisions with vehicles. 
+        // drop any carried objects
+        if (hitobj.tag == "Vehicle")
+        {
+            Debug.Log("Hit Vehicle");
+            drop(grabber.transform.forward + grabber.transform.up, "Collect");
+            if (hitobj.GetComponent<navigate>().Team == null){
+                hitobj.GetComponent<navigate>().Team = Team;
+                hitobj.GetComponent<navigate>().Agent.Warp(hitobj.transform.position);
+                hitobj.GetComponent<navigate>().Agent.enabled = false;
+                hitobj.GetComponent<navigate>().Agent.enabled = true;
+                Debug.Log("still working 1");
+                hitobj.GetComponent<navigate>().mode = "Following";
+                Debug.Log("still working 2");
+                hitobj.GetComponent<navigate>().Target=grabber.transform;
+                Debug.Log("still working 3");
+                Agent.SetDestination(Home.position); 
+            }
+
+
+        }
         if (col.gameObject.tag == "Collect" & !carying)
         {
             //Debug.Log("collected");
