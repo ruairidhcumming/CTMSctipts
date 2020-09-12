@@ -358,6 +358,7 @@ MonoBehaviour:
   units: []
   buildings: []
   selected: []
+  Name: Team1
   selector: {fileID: 6479429688812665475, guid: dbcb0316e0c49c744b5262db6a126ae2,
     type: 3}
   UIOverlay: {fileID: 0}

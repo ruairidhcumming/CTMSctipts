@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+//using System.Diagnostics;
 using System.Security.Permissions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -228,8 +229,29 @@ public class TeamHandler : MonoBehaviour
     public void dropWrapper(GameObject dropable)
     {
         //do cost and tech checks here 
-        //Debug.Log(dropable);
-        StartCoroutine(pickDropsite(dropable));
+        //Debug.Log(dropable);GetComponent<VehCFG>
+        if (dropable.GetComponent<DropCFG>() == null)
+        {
+            Debug.Log(dropable.ToString() + "This object is does not have drop config file");
+        }
+        else
+        {
+            bool start = true;
+            foreach(dropable.GetComponent<DropCFG>().cost pair in dropable.GetComponent<DropCFG>().Costs)
+            {
+                Debug.Log(TeamResources[pair.Material]);
+                if (TeamResources[pair.Material]< pair.Price)
+                {
+                    start = false;
+                    Debug.Log("not enough " + pair.Material);
+                }
+            }
+            if (start == true)
+            {
+                StartCoroutine(pickDropsite(dropable));
+            }
+        }
+        
   
     }
     public IEnumerator pickDropsite(GameObject dropable)
