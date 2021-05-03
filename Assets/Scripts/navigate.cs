@@ -50,10 +50,10 @@ public class navigate : MonoBehaviour
    // public bool carying = false;
    //public GameObject CarriedGameObject;
     public GameObject grabber;
-    public Transform Home;
+    public Transform Home = null;
     public Transform Target;
-    public Transform Base;
-    public Transform Team;
+    public Transform Base=null;
+    public Transform Team = null;
     public Transform Holding;
     public VehCFG myCFG;
     public float sightRadius;
@@ -82,7 +82,10 @@ public class navigate : MonoBehaviour
         }
         myCFG = this.GetComponent<VehCFG>();
         sightRadius = myCFG.sightRadius;
-        Agent.SetDestination(Home.position);
+        if (Home)
+        {
+            Agent.SetDestination(Home.position);
+        }
 
     }
 
@@ -135,7 +138,8 @@ public class navigate : MonoBehaviour
                 mode = "commanded";
                 //release follower
                 Follower.transform.parent.GetComponent<navigate>().Agent.SetDestination(Base.position);
-                releaseFollower(Follower);
+                addFollowerToTeam(Follower);
+                //releaseFollower(Follower);
             }
         }
         if (mode == "leading" & Follower == null) 
@@ -155,12 +159,6 @@ public class navigate : MonoBehaviour
             //check if object is selected and set selected status flag
             //Debug.Log("I'm attached to " + gameObject.name);
 
-        
-
-       
-            
-        
-        
         if (arrived(Agent) == true)
         {   
             if (mode != "idle")
@@ -171,11 +169,9 @@ public class navigate : MonoBehaviour
             if (mode == "idle") {
                 Agent.destination = Agent.transform.position; 
                  }
-
-
             
         }
-        // if the vehicle is flipped set its mode and return
+        // if the vehicle is flipped set its mode
         if (flipped(grabber))
             {
             mode = "flipped";
@@ -199,8 +195,9 @@ public class navigate : MonoBehaviour
         Debug.DrawRay(grabber.transform.position, grabber.transform.forward * 10, Color.blue);
         //steering calculations
         steeringAngle = Vector3.SignedAngle(
-            (-new Vector3(grabber.transform.position.x,0, grabber.transform.position.z)+new Vector3(Agent.transform.position.x,0,Agent.transform.position.z)+
-            Agent.transform.forward* grabber.transform.root.GetComponent<Rigidbody>().velocity.magnitude), 
+            (-new Vector3(grabber.transform.position.x,0, grabber.transform.position.z)+
+            new Vector3(Agent.transform.position.x,0,Agent.transform.position.z)+
+            Agent.transform.forward* Agent.velocity.magnitude), 
             new Vector3(grabber.transform.forward.x, 0, grabber.transform.forward.z),
             Vector3.up);
 
@@ -255,14 +252,18 @@ public class navigate : MonoBehaviour
         {
             stucktimer = 2f;
         }
-        if (dist> Vector3.Dot((Agent.transform.position - grabber.transform.position).normalized, grabber.transform.forward)*5 && dist >1 )
+        if (dist> Vector3.Dot((Agent.transform.position - grabber.transform.position).normalized, grabber.transform.forward)*5 && dist >2 )
         //if the grabber agent distance is greater than  5* the component of the angent-grabber distance in the grabber forward direction and greater than 1 stop the agent moving
         //this allows time for the grabber to make tight turns without the agent getting too far away.
-        { //Debug.Log("agent speed = slow");
+        { //Debug.Log("agent speed = slow, mode 1");
             //if agent and grabber ar traveling in opposite directions 
-            Agent.speed = AgentSlowSpeed;
-            if (Vector3.Dot(Agent.desiredVelocity.normalized, grabber.transform.forward) < 0.0)
-            { Agent.speed = AgentSlowSpeed; }
+            Agent.speed = 0;//AgentSlowSpeed;
+        }
+        else if (Vector3.Dot(Agent.desiredVelocity.normalized, grabber.transform.forward) < 0.0 && dist > 2)
+            {
+            //Debug.Log("agent speed = slow, mode 2");
+            Agent.speed = 0;// AgentSlowSpeed; 
+        }
             //else if (Vector3.Dot(Agent.desiredVelocity.normalized, grabber.transform.forward) > 0.8)
             //{
             //    //if the grabber is traveling in the right direction by luck let it keep going and put the agent on top of it
@@ -271,7 +272,7 @@ public class navigate : MonoBehaviour
             //    Agent.speed = AgentSpeed
             //}   
 
-        }
+        
         else
         {
             //Debug.Log("agent speed > fast");
@@ -342,8 +343,8 @@ public class navigate : MonoBehaviour
         foreach (AxleInfo axleInfo in axleInfos)
         {   if (Brakes)
             {
-                axleInfo.leftWheel.brakeTorque = Mathf.Abs(throttle);
-                axleInfo.rightWheel.brakeTorque = Mathf.Abs(throttle);
+                axleInfo.leftWheel.brakeTorque = 100; //Mathf.Abs(throttle);
+                axleInfo.rightWheel.brakeTorque = 100;//Mathf.Abs(throttle);
             }
             if(!Brakes)
             {
@@ -370,6 +371,7 @@ public class navigate : MonoBehaviour
   
 
     public bool arrived(NavMeshAgent Agent) {
+        if (mode !="following")
         if (!Agent.pathPending&&Agent.isOnNavMesh)
 
         { 
@@ -512,16 +514,23 @@ public class navigate : MonoBehaviour
         follower.transform.parent.GetComponent<navigate>().mode="commanded";
         
         //follower.transform.parent.GetComponent<navigate>().Team = Team;
-        setTeam(follower.transform.parent);
+        //setTeam(follower.transform.parent);
         this.Follower = null;
         AgentSpeed = this.GetComponent<VehCFG>().AgentSpeed;
+    }
+    public void addFollowerToTeam(GameObject follower)
+    {
+        releaseFollower(follower);
+        setTeam(follower.transform);
     }
     public void setTeam(Transform newMember)
     {
         navigate nmnav = newMember.GetComponent<navigate>();
-        nmnav.Team = Team;
-        Team.GetComponent<TeamHandler>().InitialiseVehicle(newMember.gameObject, Base.gameObject, Home.gameObject);
-        nmnav.Base = Base;
-        nmnav.Home = Home;
+        Debug.Log("adding new member to team");
+        Debug.Log(Team);
+        //nmnav.Team = Team;
+        Team.GetComponent<TeamHandler>().InitialiseVehicle(newMember.gameObject, Base, Home);
+        // nmnav.Base = Base;
+        //nmnav.Home = Home;
     }
 }

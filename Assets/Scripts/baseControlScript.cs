@@ -40,10 +40,10 @@ public class baseControlScript : MonoBehaviour
     }
     void OnTriggerEnter(Collider col)
     {
-        Debug.Log("triggered");
+        //Debug.Log("triggered");
         var resource = col.gameObject.GetComponent<Resource>();
-        Debug.Log(resource.val);
-        //Debug.Log(resource.res);
+        
+  
         if (resource)
         {
             //Debug.Log(resource.val);
@@ -58,18 +58,19 @@ public class baseControlScript : MonoBehaviour
                
             }
             //Debug.Log(BaseResources);
+            //Debug.Log("new resource created, old destroyed");
+            Instantiate(Resource, base.transform.position + new Vector3(Random.Range(0, 100), 2000, Random.Range(0, 200)), Quaternion.identity);
+            Destroy(col.gameObject);
         }
         else
         {
             //Debug.Log("triggered by not resource component");
         }
-        Debug.Log(col.gameObject.tag);
+        //Debug.Log(col.gameObject.tag);
         //Debug.Log(col.gameObject.tag == "Thrown");
         
-        {
-            Debug.Log("new resource created, old destroyed");
-            Instantiate(Resource, base.transform.position + new Vector3(Random.Range(0, 100), 2000, Random.Range(0, 200)), Quaternion.identity);
-            Destroy(col.gameObject);
-        }
-                }
+      
+
+        
+    }
 }

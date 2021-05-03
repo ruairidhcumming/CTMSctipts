@@ -154,9 +154,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cf21940bfed13d48983696a7df995b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Costs:
-  - Material: Energy
-    price: 1
-  - Material: Material
-    price: 1
+  Costs: []
   precision: 10

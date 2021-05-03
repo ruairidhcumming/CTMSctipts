@@ -246,6 +246,7 @@ GameObject:
   - component: {fileID: -4025385210289940512}
   - component: {fileID: -6243245017653483870}
   - component: {fileID: 4153117353571123353}
+  - component: {fileID: 7867608929968092821}
   m_Layer: 0
   m_Name: CarFast
   m_TagString: Vehicle
@@ -313,6 +314,8 @@ MonoBehaviour:
   PEffect: 0
   IEffect: 0
   DEffect: 0
+  throttle: 0
+  Brakes: 0
   AgentSpeed: 10
   AgentSlowSpeed: 0.5
   stucktimer: 2
@@ -341,6 +344,8 @@ MonoBehaviour:
   selected: 0
   Agent: {fileID: 70890126554644038}
   AvoidanceAgent: {fileID: 0}
+  teamVisible: []
+  visible: []
 --- !u!114 &8746286179270573049
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,9 +379,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Costs:
   - Material: Energy
-    price: 20
+    Price: 0
   - Material: Material
-    price: 10
+    Price: 0
   precision: 10
 --- !u!208 &-6243245017653483870
 NavMeshObstacle:
@@ -407,6 +412,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offset: {x: 0, y: 1, z: 0}
+--- !u!114 &7867608929968092821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2788236523906952016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3ab9f55f08e7d74796ea4b71ce97f0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2788236525520210757
 GameObject:
   m_ObjectHideFlags: 0

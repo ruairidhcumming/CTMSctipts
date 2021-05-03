@@ -54,8 +54,8 @@ public class TeamHandler : MonoBehaviour
         while ( i < 2)
         {
             GameObject Car = Instantiate(car, base.transform.position + new Vector3(Random.Range(0, 100), 40, Random.Range(0, 100)), Quaternion.identity);
-            InitialiseVehicle(Car, Base, home);
-            Debug.Log(car.GetComponent<navigate>().mode);
+            InitialiseVehicle(Car, Base.transform, home.transform);
+            //Debug.Log(car.GetComponent<navigate>().mode);
             car.GetComponent<navigate>().Agent.SetDestination(home.transform.position);
             car.GetComponent<navigate>().mode = "commanded";
             i +=1;
@@ -177,13 +177,13 @@ public class TeamHandler : MonoBehaviour
                     if (TeamResources.ContainsKey(res.Key))
                     {
                         TeamResources[res.Key] += res.Value;
-                        Debug.Log("resource increased");
+                        //Debug.Log("resource increased");
 
                     }
                     else
                     {
                         TeamResources.Add(res.Key, res.Value);
-                        Debug.Log("added new resource");
+                        //Debug.Log("added new resource");
                     }
 
                 }
@@ -262,7 +262,7 @@ public class TeamHandler : MonoBehaviour
             {
                 if (!TeamResources.ContainsKey(pair.Material))
                 {
-                    Debug.Log("no " + pair.Material);
+                    //Debug.Log("no " + pair.Material);
                     start = false;
                 }
                 else
@@ -272,15 +272,17 @@ public class TeamHandler : MonoBehaviour
                     if (TeamResources[pair.Material] < pair.Price)
                     {
                         start = false;
-                        Debug.Log("not enough " + pair.Material);
+                        //Debug.Log("not enough " + pair.Material);
                     }
                 }
-                if (start == true)
-                {
-                    StartCoroutine(pickDropsite(dropable));
-                }
+               
             }
-
+            //cheat to make everything free
+            start = true;
+            if (start == true)
+            {
+                StartCoroutine(pickDropsite(dropable));
+            }
 
         }
     }
@@ -305,7 +307,7 @@ public class TeamHandler : MonoBehaviour
      }
      //not here yield return null;
     }
-    public void InitialiseVehicle(GameObject vehicle, GameObject Base, GameObject home )
+    public void InitialiseVehicle(GameObject vehicle, Transform Base, Transform Home )
     {
         //if (units.Count == 0)
         //{
@@ -317,8 +319,11 @@ public class TeamHandler : MonoBehaviour
         //
         //
         navigate nav = vehicle.GetComponent<navigate>();
-        nav.Home = home.transform;
-        nav.Base = Base.transform;
+        Debug.Log(Home);
+        Debug.Log(nav.Home);
+        units.Add(vehicle);
+        nav.Home = Home;
+        nav.Base = Base;
         nav.Team = gameObject.transform;
         nav.Agent.enabled = false;
         nav.Agent.enabled = true;
@@ -327,7 +332,7 @@ public class TeamHandler : MonoBehaviour
         if (Physics.Raycast(vehicle.transform.position, -Vector3.up, out hit, 1000, terrainMask)) {
             nav.Agent.Warp(hit.point);
             Debug.DrawRay(vehicle.transform.position, -Vector3.up*1000 );
-            Debug.Log("hit for agent initialisation");
+           // Debug.Log("hit for agent initialisation");
             }
         else { Debug.Log("raycast screwed up in vehicle instantiation"); }
         //nav.Agent.Warp(vehicle.transform.position);
@@ -335,11 +340,11 @@ public class TeamHandler : MonoBehaviour
         
         nav.Agent.SetDestination(nav.Home.position);
 
-        nav.mode = "commanded";
+        //nav.mode = "commanded";
 
         //Debug.Log(nav.Agent.pathPending);
         //Debug.Log(nav.arrived(nav.Agent));
-        units.Add(vehicle);
+        
   
         vehicle.GetComponent<VehCFG>().Team = Name;
 
