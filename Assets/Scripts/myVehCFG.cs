@@ -10,6 +10,8 @@ public class myVehCFG : MonoBehaviour
     public float str = 10;
     public Material HighlightMaterial;
     public Material NormalMaterial;
+    public float AgentSpeed;
+
     // Start is called before the first frame update
     void Start()
     {

@@ -6,7 +6,7 @@ using UnityEngine;
 public class cost
 {
     public string Material;
-    public int price;
+    public int Price;
 
 }
 public class DropCFG : MonoBehaviour

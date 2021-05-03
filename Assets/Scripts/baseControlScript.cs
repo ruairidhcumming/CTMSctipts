@@ -20,6 +20,7 @@ public class baseControlScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    
         //check if object is selected and set selected status flag
         //Debug.Log("I'm attached to " + gameObject.name);
        
@@ -41,11 +42,11 @@ public class baseControlScript : MonoBehaviour
     {
         Debug.Log("triggered");
         var resource = col.gameObject.GetComponent<Resource>();
-        //Debug.Log(resource.val);
+        Debug.Log(resource.val);
         //Debug.Log(resource.res);
         if (resource)
         {
-            Debug.Log(resource.val);
+            //Debug.Log(resource.val);
             //Debug.Log(resource.res);
             if (Resources.ContainsKey(resource.res)) {
                 Resources[resource.res] += resource.val;
@@ -60,11 +61,11 @@ public class baseControlScript : MonoBehaviour
         }
         else
         {
-            Debug.Log("triggered by not resource component");
+            //Debug.Log("triggered by not resource component");
         }
         Debug.Log(col.gameObject.tag);
-        Debug.Log(col.gameObject.tag == "Thrown");
-        if (col.gameObject.tag == "Thrown")
+        //Debug.Log(col.gameObject.tag == "Thrown");
+        
         {
             Debug.Log("new resource created, old destroyed");
             Instantiate(Resource, base.transform.position + new Vector3(Random.Range(0, 100), 2000, Random.Range(0, 200)), Quaternion.identity);

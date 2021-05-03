@@ -9,6 +9,8 @@ public class TeamHandler : MonoBehaviour
     public List<GameObject> units = new List<GameObject>();
     public List<GameObject> buildings = new List<GameObject>();
     public List<GameObject> selected = new List<GameObject>();
+    public List<GameObject> visible = new List<GameObject>();
+
     public string Name = "Team1";
     // POINTS FOR SELECT BOX INTERACTIONS DEFAULTING TO FAR AWAY
     Vector3 select1 = new Vector3(-9999, 0, 0);
@@ -44,19 +46,27 @@ public class TeamHandler : MonoBehaviour
         // UnityEngine.Object prefab = Resources.Load("Assets/FunNGames 1/prefabs/Car1.prefab", typeof(GameObject));
         GameObject Base = GameObject.Find("Base");
         GameObject home = GameObject.Find("Base/Home");
-        GameObject Car = Instantiate(car, base.transform.position + new Vector3(Random.Range(0, 100), 2000, Random.Range(0, 200)), Quaternion.identity);
         
         buildings.Add(Base);
         canvas = transform.Find("Canvas");
         textbox = canvas.GetComponent<Text>();
-        InitialiseVehicle(Car, Base, home);
+        int i = 0;
+        while ( i < 2)
+        {
+            GameObject Car = Instantiate(car, base.transform.position + new Vector3(Random.Range(0, 100), 40, Random.Range(0, 100)), Quaternion.identity);
+            InitialiseVehicle(Car, Base, home);
+            Debug.Log(car.GetComponent<navigate>().mode);
+            car.GetComponent<navigate>().Agent.SetDestination(home.transform.position);
+            car.GetComponent<navigate>().mode = "commanded";
+            i +=1;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
 
-
+        //selection mechanics 
         if (Input.GetMouseButtonDown(0))
         {
             //Debug.Log("Click");
@@ -190,8 +200,19 @@ public class TeamHandler : MonoBehaviour
         }
         textbox.text = txt;
 
-        //check which object is currently selected and draw UI
+        // get visible objects from all units and buildings, create the team visibility list then distribute it to units and building
+        visible = new List<GameObject>();
+        foreach (GameObject unit in units)
+        {
+            foreach (GameObject obj in unit.GetComponent<navigate>().visible) {
+                if (!visible.Contains(obj)) {
+                    visible.Add(obj);
+                }
+            }
+            //impliment similar system for buildings
 
+        }
+        
     }
 
     List<GameObject> selectInCube(GameObject cube)
@@ -203,7 +224,7 @@ public class TeamHandler : MonoBehaviour
         {
             foreach (GameObject unit in units)
             {
-                if (unit == obj || obj.transform.IsChildOf(unit.transform))
+                if ((unit == obj || obj.transform.IsChildOf(unit.transform))&& !otpt.Contains(unit))
                 {
                     otpt.Add(unit);
                 }
@@ -216,7 +237,7 @@ public class TeamHandler : MonoBehaviour
             {
                 foreach (GameObject unit in buildings)
                 {
-                    if (unit == obj || obj.transform.IsChildOf(unit.transform))
+                    if ((unit == obj || obj.transform.IsChildOf(unit.transform))&& !otpt.Contains(unit))
                     {
                         otpt.Add(unit);
                     }
@@ -237,22 +258,31 @@ public class TeamHandler : MonoBehaviour
         else
         {
             bool start = true;
-            //foreach(dropable.GetComponent<DropCFG>().cost pair in dropable.GetComponent<DropCFG>().Costs)
-            //{
-             //   Debug.Log(TeamResources[pair.Material]);
-            //    if (TeamResources[pair.Material]< pair.Price)
-            //    {
-           //         start = false;
-           ////         Debug.Log("not enough " + pair.Material);
-           //     }
-           // }
-            if (start == true)
+            foreach (cost pair in dropable.GetComponent<DropCFG>().Costs)
             {
-                StartCoroutine(pickDropsite(dropable));
+                if (!TeamResources.ContainsKey(pair.Material))
+                {
+                    Debug.Log("no " + pair.Material);
+                    start = false;
+                }
+                else
+                {
+
+                    Debug.Log(TeamResources[pair.Material]);
+                    if (TeamResources[pair.Material] < pair.Price)
+                    {
+                        start = false;
+                        Debug.Log("not enough " + pair.Material);
+                    }
+                }
+                if (start == true)
+                {
+                    StartCoroutine(pickDropsite(dropable));
+                }
             }
+
+
         }
-        
-  
     }
     public IEnumerator pickDropsite(GameObject dropable)
 
@@ -277,21 +307,42 @@ public class TeamHandler : MonoBehaviour
     }
     public void InitialiseVehicle(GameObject vehicle, GameObject Base, GameObject home )
     {
+        //if (units.Count == 0)
+        //{
+        //    vehicle.transform.position = home.transform.position + new Vector3(0, 1, 0);
+        //}
+        // 
+        // 
+        //
+        //
+        //
+        navigate nav = vehicle.GetComponent<navigate>();
+        nav.Home = home.transform;
+        nav.Base = Base.transform;
+        nav.Team = gameObject.transform;
+        nav.Agent.enabled = false;
+        nav.Agent.enabled = true;
+
+        RaycastHit hit = new RaycastHit();
+        if (Physics.Raycast(vehicle.transform.position, -Vector3.up, out hit, 1000, terrainMask)) {
+            nav.Agent.Warp(hit.point);
+            Debug.DrawRay(vehicle.transform.position, -Vector3.up*1000 );
+            Debug.Log("hit for agent initialisation");
+            }
+        else { Debug.Log("raycast screwed up in vehicle instantiation"); }
+        //nav.Agent.Warp(vehicle.transform.position);
+        //nav.Target = nav.Home;
         
-        vehicle.transform.position = home.transform.position + new Vector3(0, 1, 0);
-        // 
-        // 
-        //
-        //
-        //
-        vehicle.GetComponent<navigate>().Home = home.transform;
-        vehicle.GetComponent<navigate>().Base = Base.transform;
-        vehicle.GetComponent<navigate>().Team = gameObject.transform;
-        vehicle.GetComponent<navigate>().Agent.enabled = false;
-        vehicle.GetComponent<navigate>().Agent.enabled = true;
-        //vehicle.GetComponent<navigate>().Agent.Warp(home.transform.position);
+        nav.Agent.SetDestination(nav.Home.position);
+
+        nav.mode = "commanded";
+
+        //Debug.Log(nav.Agent.pathPending);
+        //Debug.Log(nav.arrived(nav.Agent));
         units.Add(vehicle);
+  
         vehicle.GetComponent<VehCFG>().Team = Name;
+
     }
 
 }

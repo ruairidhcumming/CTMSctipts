@@ -28,6 +28,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: ResourceSphereMaterial Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 6648728907001823992, guid: a078e764d40fd2940bd3f489829939d6,
+        type: 3}
+      propertyPath: m_Mass
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -45,6 +55,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
         type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
+        type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
@@ -56,16 +71,6 @@ PrefabInstance:
     - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
-        type: 3}
-      propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6648728907001823993, guid: a078e764d40fd2940bd3f489829939d6,
