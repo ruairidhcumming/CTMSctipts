@@ -10,7 +10,7 @@ public class TeamHandler : MonoBehaviour
     public List<GameObject> buildings = new List<GameObject>();
     public List<GameObject> selected = new List<GameObject>();
     public List<GameObject> visible = new List<GameObject>();
-
+    public Transform NoTeam;//transform for objects with no team, needs to be visible to team for comparison
     public string Name = "Team1";
     // POINTS FOR SELECT BOX INTERACTIONS DEFAULTING TO FAR AWAY
     Vector3 select1 = new Vector3(-9999, 0, 0);
@@ -319,8 +319,8 @@ public class TeamHandler : MonoBehaviour
         //
         //
         navigate nav = vehicle.GetComponent<navigate>();
-        Debug.Log(Home);
-        Debug.Log(nav.Home);
+        //Debug.Log(Home);
+        //Debug.Log(nav.Home);
         units.Add(vehicle);
         nav.Home = Home;
         nav.Base = Base;
@@ -349,5 +349,10 @@ public class TeamHandler : MonoBehaviour
         vehicle.GetComponent<VehCFG>().Team = Name;
 
     }
+    public void loseVehicle(GameObject vehicle) 
+    {
+        units.Remove(vehicle);
+    }
+
 
 }

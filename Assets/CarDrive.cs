@@ -36,7 +36,7 @@ public class CarDrive : MonoBehaviour
         //check if object is carying something
         if (carying == false & nav.mode == "idle")
         {   
-
+            //first check for collectable resources within sight of the vehicle
             GameObject nearest = nav.NearestInList(nav.Agent, nav.GetTaggedAndVisible(collectTag));
             if (nearest)
             {
@@ -44,7 +44,7 @@ public class CarDrive : MonoBehaviour
              nav.Agent.SetDestination(nearest.transform.position);
 
             }
-            else
+            else//then check the whole team list
             {   
                 nearest = nav.NearestInList(nav.Agent, nav.GetTaggedFromList(collectTag, nav.Team.GetComponent<TeamHandler>().visible));
                 if (nearest)
@@ -53,6 +53,14 @@ public class CarDrive : MonoBehaviour
                     nav.Agent.SetDestination(nearest.transform.position);
 
                 }
+            }
+            //then check for unassigned vehicles which could be collected
+            foreach (GameObject obj in nav.Team.GetComponent<TeamHandler>().visible)
+            {   //if its a vehicle with no team
+                if (obj.tag == "Vehicle" && obj.GetComponent<navigate>().Team == nav.Team.GetComponent<TeamHandler>().NoTeam) {
+                    nav.Agent.SetDestination(obj.transform.position);
+                }
+
             }
 
         }
@@ -98,7 +106,7 @@ public class CarDrive : MonoBehaviour
 
                 drop(CarriedGameObject,caller, Vector3.Normalize(caller.grabber.transform.forward + caller.grabber.transform.up), "Collect");
             }
-            if (hitobj.GetComponent<navigate>().Team == null)
+            if (hitobj.GetComponent<navigate>().Team == nav.Team.GetComponent<TeamHandler>().NoTeam)
             {
 
                 //hitobj.GetComponent<navigate>().Team = caller.Team;
@@ -112,7 +120,7 @@ public class CarDrive : MonoBehaviour
                 hitobj.GetComponent<navigate>().Agent.Warp(hitobj.transform.position);
                 hitobj.GetComponent<navigate>().Agent.enabled = false;
                 hitobj.GetComponent<navigate>().Agent.enabled = true;
-
+                hitobj.GetComponent<navigate>().Agent.transform.parent = nav.Team;
                 hitobj.GetComponent<navigate>().mode = "following";
 
                 caller.Follower = hitobj.GetComponent<navigate>().grabber;

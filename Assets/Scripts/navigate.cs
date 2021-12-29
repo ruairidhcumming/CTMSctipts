@@ -71,11 +71,12 @@ public class navigate : MonoBehaviour
         Agent = this.gameObject.transform.Find("navmeshHolder").GetComponent<NavMeshAgent>();
         AvoidanceAgent = this.gameObject.transform.Find("body").GetComponent<NavMeshAgent>();
         Agent.transform.parent = Team;
-        //Agent.updatePosition = false;
-        //Agent.updateRotation = false;
+
         //turn agent off and on again
         Agent.enabled = false;
         Agent.enabled = true;
+        //Agent.updatePosition = false;
+        //Agent.updateRotation = false;
         //carying = false;
         if (grabber == null) {
             grabber = this.GetComponent<GameObject>();
@@ -91,10 +92,12 @@ public class navigate : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {   if (Team == null)
+    {   
+        if (Team.GetComponent<TeamHandler>().Name =="NoTeam")
         {
             return;
         }
+        //send visible objects to team
         visible = GetVisible(sightRadius);
         if (Team.GetComponent<TeamHandler>().selected.Contains(gameObject)&& selected == false)//
         {   Debug.Log(gameObject.name + "is selected");
@@ -195,9 +198,9 @@ public class navigate : MonoBehaviour
         Debug.DrawRay(grabber.transform.position, grabber.transform.forward * 10, Color.blue);
         //steering calculations
         steeringAngle = Vector3.SignedAngle(
-            (-new Vector3(grabber.transform.position.x,0, grabber.transform.position.z)+
-            new Vector3(Agent.transform.position.x,0,Agent.transform.position.z)+
-            Agent.transform.forward* Agent.velocity.magnitude), 
+            (-new Vector3(grabber.transform.position.x, 0, grabber.transform.position.z) +
+            new Vector3(Agent.transform.position.x, 0, Agent.transform.position.z) +
+            Agent.transform.forward * Agent.velocity.magnitude),
             new Vector3(grabber.transform.forward.x, 0, grabber.transform.forward.z),
             Vector3.up);
 
@@ -210,19 +213,19 @@ public class navigate : MonoBehaviour
             (grabber.transform.position - new Vector3(0, grabber.transform.position.y, 0)) - (Agent.transform.position - new Vector3(0, Agent.transform.position.y, 0)),
             grabber.transform.forward
             );
-       
+
         // old p simple linear distance on ground plane
-        float dist  =((grabber.transform.position - new Vector3(0, grabber.transform.position.y, 0)) - (Agent.transform.position - new Vector3(0, Agent.transform.position.y, 0))) .magnitude;
+        float dist = ((grabber.transform.position - new Vector3(0, grabber.transform.position.y, 0)) - (Agent.transform.position - new Vector3(0, Agent.transform.position.y, 0))).magnitude;
         //if target is infront of grabber drive forwards else drive backwards
         if (fbd < 0)
         {
             p = -dist;
-        } 
+        }
         else
         {
             p = dist;
         }
-        if (dist < 1& Agent.desiredVelocity.magnitude <0.1)
+        if (dist < 1 & Agent.desiredVelocity.magnitude < 0.1)
         {
             p = 0;
             dist = 0;
@@ -252,7 +255,7 @@ public class navigate : MonoBehaviour
         {
             stucktimer = 2f;
         }
-        if (dist> Vector3.Dot((Agent.transform.position - grabber.transform.position).normalized, grabber.transform.forward)*5 && dist >2 )
+        if (dist > Vector3.Dot((Agent.transform.position - grabber.transform.position).normalized, grabber.transform.forward) * 5 && dist > 2)
         //if the grabber agent distance is greater than  5* the component of the angent-grabber distance in the grabber forward direction and greater than 1 stop the agent moving
         //this allows time for the grabber to make tight turns without the agent getting too far away.
         { //Debug.Log("agent speed = slow, mode 1");
@@ -260,19 +263,19 @@ public class navigate : MonoBehaviour
             Agent.speed = 0;//AgentSlowSpeed;
         }
         else if (Vector3.Dot(Agent.desiredVelocity.normalized, grabber.transform.forward) < 0.0 && dist > 2)
-            {
+        {
             //Debug.Log("agent speed = slow, mode 2");
             Agent.speed = 0;// AgentSlowSpeed; 
         }
-            //else if (Vector3.Dot(Agent.desiredVelocity.normalized, grabber.transform.forward) > 0.8)
-            //{
-            //    //if the grabber is traveling in the right direction by luck let it keep going and put the agent on top of it
-            //    Debug.Log("im buggering up the initialisation");
-            //    Agent.Warp(grabber.transform.position);
-            //    Agent.speed = AgentSpeed
-            //}   
+        //else if (Vector3.Dot(Agent.desiredVelocity.normalized, grabber.transform.forward) > 0.8)
+        //{
+        //    //if the grabber is traveling in the right direction by luck let it keep going and put the agent on top of it
+        //    Debug.Log("im buggering up the initialisation");
+        //    Agent.Warp(grabber.transform.position);
+        //    Agent.speed = AgentSpeed
+        //}   
 
-        
+
         else
         {
             //Debug.Log("agent speed > fast");
@@ -294,32 +297,33 @@ public class navigate : MonoBehaviour
         steeringAngle = steeringAngle - (steeringAngle + SAold) * SteeringD;
         SAold = steeringAngle;
         i = iold + p;// -dist;
-      
+
         d = p - pold;
 
         pold = p;
         iold = i;
-        iold = Mathf.Clamp(iold,-200, 200);
+        iold = Mathf.Clamp(iold, -200, 200);
         dold = d;
-        PEffect = -p * P +dist *P/10;
+        PEffect = -p * P + dist * P / 10;
         IEffect = -i * I;
         DEffect = -d * D;
 
-        throttle = PEffect+ IEffect + DEffect;
-        if (throttle < 0& grabber.transform.root.GetComponent<Rigidbody>().velocity.sqrMagnitude < 1) 
+        throttle = PEffect + IEffect + DEffect;
+        if (throttle < 0 & grabber.transform.root.GetComponent<Rigidbody>().velocity.sqrMagnitude < 1)
         {
             steeringAngle = -steeringAngle;
         }
         //apply calculated values to wheels
-       
-       
+
+
         Brakes = false;
         //if traveling fast and making a tight turn apply brakes and reduce steering angle, gives smoother turns
         float vmag = grabber.transform.root.GetComponent<Rigidbody>().velocity.magnitude;
-        if (vmag > 1 && steeringAngle>20)
+        if (vmag > (10 / (Mathf.Abs(steeringAngle))) +1)
         {
             Brakes = true;
-            steeringAngle = steeringAngle / vmag;
+            steeringAngle = steeringAngle / (vmag*10);
+            throttle = 0;
         }
         //if trying to slow down apply brakes
         if (Vector3.Dot(grabber.transform.root.GetComponent<Rigidbody>().velocity, Agent.transform.position- grabber.transform.position)<0 && throttle< 0 &&fbd <0)//body moving , trottle is negative and forward/back distance to targetis negative
@@ -387,26 +391,7 @@ public class navigate : MonoBehaviour
         }
         return false;
     }
-    //old function to be removed
-    List<GameObject> GetCollectables(NavMeshAgent Agent)
-    {
-        List<GameObject> Collectables = new List<GameObject>();
-        NavMeshPath path = new NavMeshPath();
-        foreach (GameObject w in GameObject.FindGameObjectsWithTag("Collect"))
-       
-        {
-            Agent.CalculatePath(w.transform.position,path );
-
-            if (path.status == NavMeshPathStatus.PathComplete)
-            {
-                Collectables.Add(w);
-            }
-            //could mark unreachable targets here
-
-        };
-
-        return Collectables;
-    }
+   
     
     public List<GameObject> GetTaggedAndVisible(string tag)
     {
@@ -447,9 +432,9 @@ public class navigate : MonoBehaviour
         foreach (Collider w2 in nearCols)
 
         {
-         
-          objs.Add(w2.gameObject);
-
+            if( w2.tag != "Terrain"){
+                objs.Add(w2.transform.root.gameObject);
+            }
 
         };
 
@@ -461,15 +446,20 @@ public class navigate : MonoBehaviour
         List<GameObject>  Collectables =Targets;
         nearest = null;
         foreach (GameObject w in Collectables)
-        {
-            if (nearest == null)
+        {   if (w == this.transform.root.gameObject) {
+                Debug.Log("at least we are trying");
+                continue; 
+            }
+
+            else if (nearest == null)
             {
                 nearest = w;
             }
 
             else if (
-                Vector3.Distance(grabber.transform.position, w.GetComponent<Collider>().ClosestPointOnBounds(grabber.transform.position)) <
-                Vector3.Distance(grabber.transform.position, nearest.GetComponent<Collider>().ClosestPointOnBounds(grabber.transform.position)))
+                Vector3.Distance(grabber.transform.position, w.transform.position) <
+                Vector3.Distance(grabber.transform.position, nearest.transform.position)
+                )
             {
 
                 nearest = w;
@@ -525,7 +515,7 @@ public class navigate : MonoBehaviour
     }
     public void setTeam(Transform newMember)
     {
-        navigate nmnav = newMember.GetComponent<navigate>();
+        //navigate nmnav = newMember.GetComponent<navigate>();
         Debug.Log("adding new member to team");
         Debug.Log(Team);
         //nmnav.Team = Team;

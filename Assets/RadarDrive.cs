@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeavyDrive : MonoBehaviour
+public class RadarDrive : MonoBehaviour
 {
     public bool carying = false;
     GameObject CarriedGameObject;
     navigate nav;
     public Vector3 offset = new Vector3(0f, 1f, 0f);
     string collectTag = "collect";
+    public bool scanning = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,8 +19,12 @@ public class HeavyDrive : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-            if (carying == true)
+        if (nav.Team.GetComponent<TeamHandler>().Name == "NoTeam")
+        {
+            return;
+        }
+        //if we are carrying someting take it to the base
+        if (carying == true)
             {
                 CarriedGameObject.transform.position = nav.grabber.transform.position + offset;// + col.transform.localScale.magnitude);
                 CarriedGameObject.transform.rotation = nav.grabber.transform.rotation;
@@ -31,74 +36,49 @@ public class HeavyDrive : MonoBehaviour
                 }
             }
 
-            //check if object is carying something
-            if (carying == false & nav.mode == "idle")
+            //check if object is not carying something
+            else
             {
-
-                GameObject nearest = nav.NearestInList(nav.Agent, nav.GetTaggedAndVisible(collectTag));
-                if (nearest)
-                {
-
-                    nav.Agent.SetDestination(nearest.transform.position);
-                    nav.mode = "commanded";
-                }
-                else
-                {
-                    nearest = nav.NearestInList(nav.Agent, nav.GetTaggedFromList(collectTag, nav.Team.GetComponent<TeamHandler>().visible));
-                    if (nearest)
-                    {
-                        nav.Agent.SetDestination(nearest.transform.position);
-                        nav.mode = "commanded";
-                    }
-                    else
-                    {//check for team vehicles which have been flipped TODO: or are stuck on my team
-               
-                        foreach (GameObject obj in nav.Team.GetComponent<TeamHandler>().visible)
-                        {
-                            if (obj.tag == "Vehicle" && obj.GetComponent<navigate>().Team == nav.Team && obj.GetComponent<navigate>().mode == "flipped")
-                            { nav.Agent.SetDestination(obj.transform.position);
-                                nav.mode = "commanded";
-
-                            }
-
-                        }
-                        if (nav.mode =="idle"    )
-                        //then check for unassigned vehicles which could be collected
-                            foreach (GameObject obj in nav.Team.GetComponent<TeamHandler>().visible)
-                        {   //if its a vehicle with no team
-                         
-                            if (obj.tag == "Vehicle" && obj.GetComponent<navigate>().Team == nav.Team.GetComponent<TeamHandler>().NoTeam)
-                            {
-                                nav.Agent.SetDestination(obj.transform.position);
-                                nav.mode = "commanded";
-                                }
+            //if we have arrived scan and move on else wait untill arrived 
+            if (nav.arrived(nav.Agent))
+            {
+                scan();
 
 
-                            }
-                        if (nav.mode == "idle")//now look for flipped ENEMY vehicles to steal
-                        {
-                
-                            foreach (GameObject obj in nav.Team.GetComponent<TeamHandler>().visible)
-                           {
-                                if (obj.tag == "Vehicle" && obj.GetComponent<navigate>().Team != nav.Team && obj.GetComponent<navigate>().mode == "flipped")
-                                {
-                                    nav.Agent.SetDestination(obj.transform.position);
-                                    nav.mode = "commanded";
+                //find a point near a friendly object and move there 
 
-                                }
+                //todo make sure chosen object is not another radar car
 
-                            }
+                int maxInt = nav.Team.GetComponent<TeamHandler>().visible.Count;
+                int chosenInt = Random.Range(0, maxInt+1);
+                Debug.Log(maxInt);
+                Debug.Log(chosenInt);
+                GameObject chosen = nav.Team.GetComponent<TeamHandler>().visible[chosenInt];
 
-                        }
-                    }
-
-                }
-
-
+                nav.Agent.destination = chosen.transform.position - chosen.transform.forward * 5;
+                nav.mode = "commanded";
+            }
 
             }
-           
         
+    }
+
+    public IEnumerator scan()
+    {
+        int ScanPower = 5;
+        //stop scanner moving while scan in progress
+        nav.Agent.enabled = false;
+        scanning = true;
+        //set visibility distance to higher value
+        nav.myCFG.sightRadius = nav.myCFG.sightRadius * ScanPower;
+        // wait for scan
+        new WaitForSeconds(5);
+        //set visibility distance to lower value again
+        nav.myCFG.sightRadius = nav.myCFG.sightRadius / ScanPower;
+        scanning = false;
+        //allow scanner to move again
+        nav.Agent.enabled = true;
+        yield return null;
     }
     void OnTriggerEnter(Collider col)
     {
